@@ -237,6 +237,8 @@ local function runServer()
 	end
 end
 
+local monitor = peripheral.wrap("top")
+
 local function waitForTerminate()
 	while true do
 		local event = os.pullEventRaw()
@@ -244,6 +246,7 @@ local function waitForTerminate()
 			print("Terminating safely!");
 			fs.delete("tmp")
 			fs.delete("tmp.lua")
+			monitor.clear()
 			os.shutdown()
 		end
 	end
@@ -264,22 +267,33 @@ local function createAccount()
 	os.ws.send(textutils.serializeJSON(createAccountPacket))
 end
 
-local function focusInstalled()
-	return os.focalPort.hasFocus()
+
+local function isIotaTable(iota)
+	return type(iota) == "table"
 end
 
-local monitor = peripheral.wrap("top")
+
+local function playerFocusInstalled()
+	local hasFocus = false
+	local f = os.focalPort.hasFocus()
+	if f and isIotaTable(os.focalPort.readIota()) then
+		local iota = os.focalPort.readIota()
+		if iota.isPlayer then hasFocus = true end
+	end
+	return hasFocus
+end
+
 monitor.clear()
 setMonitor(monitor)
 local accountButton = create("Create Account")
 accountButton.setPos(1, 1)
 accountButton.onClick(createAccount)
-accountButton.setActive(focusInstalled())
+accountButton.setActive(playerFocusInstalled())
 
 local balanceButton = create("Check Balance")
 balanceButton.setPos(1, 2)
 balanceButton.onClick(getBalance)
-balanceButton.setActive(focusInstalled())
+balanceButton.setActive(playerFocusInstalled())
 
 
 local function waitForButtons()
@@ -302,10 +316,18 @@ local function monitorFocalPort()
 		local eventData = { os.pullEvent() }
 		local event = eventData[1]
 		if event == "focus_inserted" then
-			setActive(true)
+			local iota = os.focalPort.readIota()
+			if isIotaTable(iota) and iota.isPlayer then setActive(true) end
 		else if event == "focus_removed" then
 			setActive(false)
-		end end
+		else if event == "new_iota" then
+			local iota = os.focalPort.readIota()
+			if isIotaTable(iota) and iota.isPlayer then
+				setActive(true)
+			else
+				setActive(false)
+			end
+		end end end
 		reloadButtons()
 	end
 end
