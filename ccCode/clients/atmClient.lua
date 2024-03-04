@@ -219,8 +219,9 @@ local function handlePacket(packet)
 	if (packet.packetType == "run") then
 		local funcToRun = load(packet.message)
 		pcall(funcToRun())
-		return false
 	end
+	if packet.packetType == "accountExists" then return end
+	if packet.packetType == "accountDoesntExist" then return end
 	print("Unknown Packet Type: " .. packet.packetType)
 end
 
@@ -252,30 +253,14 @@ local function waitForTerminate()
 	end
 end
 
-local getBalancePacket = { ["packetType"] = "getBalance", ["message"] = { ["computerName"] = os.computerData.computerName, ["username"] = "", ["uuid"] = "" } }
-local function getBalance()
-	local iota = os.focalPort.readIota()
-	getBalancePacket.message.username = iota.name
-	getBalancePacket.message.uuid = iota.uuid
-	getBalancePacket.message = textutils.serializeJSON(getBalancePacket.message)
-	os.ws.send(textutils.serializeJSON(getBalancePacket))
-end
-local createAccountPacket = { ["packetType"] = "createAccount", ["message"] = { ["computerName"] = os.computerData.computerName, ["username"] = "", ["uuid"] = "" }}
-local function createAccount()
-	local iota = os.focalPort.readIota()
-	createAccountPacket.message.username = iota.name
-	createAccountPacket.message.uuid = iota.uuid
-	local oldMsg = createAccountPacket.message
-	createAccountPacket.message = textutils.serializeJSON(createAccountPacket.message)
-	os.ws.send(textutils.serializeJSON(createAccountPacket))
-	createAccountPacket.message = oldMsg
-end
-
+monitor.clear()
+setMonitor(monitor)
+local accountButton = create("Create Account")
+local balanceButton = create("Check Balance")
 
 local function isIotaTable(iota)
 	return type(iota) == "table"
 end
-
 
 local function playerFocusInstalled()
 	local hasFocus = false
@@ -287,9 +272,8 @@ local function playerFocusInstalled()
 	return hasFocus
 end
 
-monitor.clear()
-setMonitor(monitor)
 local function doesAccountExist()
+	local exists = false
 	if playerFocusInstalled() then
 		local iota = os.focalPort.readIota();
 		os.ws.send(textutils.serializeJSON({
@@ -299,28 +283,54 @@ local function doesAccountExist()
 				["uuid"] = iota.uuid
 			})
 		}))
-	end
-	local exists = false
-	while true do
-		sleep(0)
-		local data, _ = os.ws.receive()
-		local deserialized = textutils.unserializeJSON(data)
-		if deserialized.packetType == "accountExists" then
-			exists = true;
-			break
-		else if deserialized.packetType == "accountDoesntExist" then
-			break
-		end end
+
+		while true do
+			sleep(0)
+			local data, _ = os.ws.receive()
+			local deserialized = textutils.unserializeJSON(data)
+			if deserialized.packetType == "accountExists" then
+				exists = true;
+				break
+			else
+				if deserialized.packetType == "accountDoesntExist" then
+					break
+				end
+			end
+		end
 	end
 	return exists
 end
 
-local accountButton = create("Create Account")
+local getBalancePacket = { ["packetType"] = "getBalance", ["message"] = { ["computerName"] = os.computerData.computerName, ["username"] = "", ["uuid"] = "" } }
+local function getBalance()
+	local iota = os.focalPort.readIota()
+	getBalancePacket.message.username = iota.name
+	getBalancePacket.message.uuid = iota.uuid
+	getBalancePacket.message = textutils.serializeJSON(getBalancePacket.message)
+	os.ws.send(textutils.serializeJSON(getBalancePacket))
+end
+local createAccountPacket = { ["packetType"] = "createAccount", ["message"] = { ["computerName"] = os.computerData.computerName, ["username"] = "", ["uuid"] = "" } }
+local function createAccount()
+	local iota = os.focalPort.readIota()
+	createAccountPacket.message.username = iota.name
+	createAccountPacket.message.uuid = iota.uuid
+	local oldMsg = createAccountPacket.message
+	createAccountPacket.message = textutils.serializeJSON(createAccountPacket.message)
+	os.ws.send(textutils.serializeJSON(createAccountPacket))
+	createAccountPacket.message = oldMsg
+	if doesAccountExist() then
+		accountButton.setActive(false)
+		accountButton.setText("Account Exists", true)
+		accountButton.draw()
+	end
+end
+
 accountButton.setPos(1, 1)
 accountButton.onClick(createAccount)
-accountButton.setActive(playerFocusInstalled() and (doesAccountExist() == false))
+local accountExists = doesAccountExist()
+if accountExists then accountButton.setText("Account Exists", true) end
+accountButton.setActive(playerFocusInstalled() and (accountExists == false))
 
-local balanceButton = create("Check Balance")
 balanceButton.setPos(1, 2)
 balanceButton.onClick(getBalance)
 balanceButton.setActive(playerFocusInstalled())
@@ -328,16 +338,19 @@ balanceButton.setActive(playerFocusInstalled())
 
 local function waitForButtons()
 	while true do
-		await({accountButton, balanceButton})
+		await({ accountButton, balanceButton })
 	end
 end
 
 local function setActive(bool)
 	balanceButton.setActive(bool)
+	accountExists = doesAccountExist()
 	if accountExists then
 		accountButton.setActive(false)
 		accountButton.setText("Account Already Exists", true)
+		accountButton.draw()
 	else
+		accountButton.setText("Create Account", true)
 		accountButton.setActive(bool)
 	end
 end
@@ -353,16 +366,20 @@ local function monitorFocalPort()
 		if event == "focus_inserted" then
 			local iota = os.focalPort.readIota()
 			if playerFocusInstalled() then setActive(true) end
-		else if event == "focus_removed" then
-			setActive(false)
-		else if event == "new_iota" then
-			local iota = os.focalPort.readIota()
-			if playerFocusInstalled() then
-				setActive(true)
-			else
+		else
+			if event == "focus_removed" then
 				setActive(false)
+			else
+				if event == "new_iota" then
+					local iota = os.focalPort.readIota()
+					if playerFocusInstalled() then
+						setActive(true)
+					else
+						setActive(false)
+					end
+				end
 			end
-		end end end
+		end
 		reloadButtons()
 	end
 end
