@@ -4,7 +4,12 @@ print("What is the computer's type? (ATM, SERVER, POWER)")
 local type = read()
 print("Name: ".. name .. "\nType: " .. type)
 local startup = fs.open("startup", "w")
-startup.write('shell.run("websocket")')
+local startupContents = [[
+  fs.delete("tmp")
+  fs.delete("tmp2")
+  shell.run("websocket")
+]]
+startup.write(startupContents)
 startup.close()
 
 local websocket = [[
