@@ -1,0 +1,3 @@
+pastebin get X41PbmrC setup
+or
+pastebin run X41PbmrC

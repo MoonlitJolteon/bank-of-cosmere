@@ -1,0 +1,11 @@
+<body>
+    <form action={{#if all}}"runAll"{{else}}"runOne"{{/if}} method="POST">
+        {{#if one}}<input type="text" name="target" placeholder="Target Computer" required>{{/if}}
+        <input type="text" name="code" placeholder="print('Hello World!')" required>
+        <input type="submit" value="Send">
+    </form>
+    <h1>Available Clients</h1>
+    {{#each clients}}
+    <p>{{this}}</p>
+    {{/each}}
+</body>

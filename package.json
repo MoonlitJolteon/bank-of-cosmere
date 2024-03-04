@@ -1,0 +1,25 @@
+{
+  "name": "bank-of-cosmere",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.21",
+    "@types/ws": "^8.5.10",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "handlebars": "^4.7.8",
+    "mariadb": "^3.2.3",
+    "reflect-metadata": "^0.2.1",
+    "sequelize": "^6.37.1",
+    "sequelize-typescript": "^2.1.6",
+    "winston": "^3.11.0",
+    "ws": "^8.16.0"
+  }
+}
