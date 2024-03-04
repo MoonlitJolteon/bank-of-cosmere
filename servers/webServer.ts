@@ -3,7 +3,7 @@ import handlebars from 'express-handlebars';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { getClients } from "./ccWebsocket";
-import { CodeHandler } from "../handlers/code";
+import { CodeHandler } from "../handlers/codeHandler";
 export const app: Express = express();
 
 app.use(bodyParser.urlencoded({
