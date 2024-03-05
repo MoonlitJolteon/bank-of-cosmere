@@ -215,10 +215,17 @@ end
 
 -- END BUTTON CODE --
 -- START ATM CODE --
+local monitor = peripheral.wrap("top")
 local function handlePacket(packet)
 	if (packet.packetType == "run") then
 		local funcToRun = load(packet.message)
 		pcall(funcToRun())
+	end
+	if (packet.packetType == "balance") then
+		monitor.clear()
+		monitor.setCursorPos(1, 2)
+		monitor.write("Balance: " .. packet.message .. "C")
+		return
 	end
 	if packet.packetType == "accountExists" then return end
 	if packet.packetType == "accountDoesntExist" then return end
@@ -238,8 +245,6 @@ local function runServer()
 	end
 end
 
-local monitor = peripheral.wrap("top")
-
 local function waitForTerminate()
 	while true do
 		local event = os.pullEventRaw()
@@ -256,7 +261,6 @@ end
 monitor.clear()
 setMonitor(monitor)
 local accountButton = create("Create Account")
-local balanceButton = create("Check Balance")
 
 local function isIotaTable(iota)
 	return type(iota) == "table"
@@ -289,7 +293,7 @@ local function doesAccountExist()
 			local data, _ = os.ws.receive()
 			local deserialized = textutils.unserializeJSON(data)
 			if deserialized.packetType == "accountExists" then
-				exists = true;
+				exists = deserialized.message;
 				break
 			else
 				if deserialized.packetType == "accountDoesntExist" then
@@ -303,12 +307,21 @@ end
 
 local getBalancePacket = { ["packetType"] = "getBalance", ["message"] = { ["computerName"] = os.computerData.computerName, ["username"] = "", ["uuid"] = "" } }
 local function getBalance()
+	if not playerFocusInstalled() then return end
 	local iota = os.focalPort.readIota()
 	getBalancePacket.message.username = iota.name
 	getBalancePacket.message.uuid = iota.uuid
+	local oldMsg = getBalancePacket.message
 	getBalancePacket.message = textutils.serializeJSON(getBalancePacket.message)
 	os.ws.send(textutils.serializeJSON(getBalancePacket))
+	getBalancePacket.message = oldMsg
 end
+
+local function reloadScreen()
+	accountButton.draw()
+end
+getBalance()
+
 local createAccountPacket = { ["packetType"] = "createAccount", ["message"] = { ["computerName"] = os.computerData.computerName, ["username"] = "", ["uuid"] = "" } }
 local function createAccount()
 	local iota = os.focalPort.readIota()
@@ -318,45 +331,44 @@ local function createAccount()
 	createAccountPacket.message = textutils.serializeJSON(createAccountPacket.message)
 	os.ws.send(textutils.serializeJSON(createAccountPacket))
 	createAccountPacket.message = oldMsg
-	if doesAccountExist() then
+	sleep(0.1)
+	local accName = doesAccountExist();
+	if accName then
 		accountButton.setActive(false)
-		accountButton.setText("Account Exists", true)
-		accountButton.draw()
+		accountButton.setText(accName, true)
+		monitor.clear()
+		reloadScreen()
+		getBalance()
 	end
 end
 
 accountButton.setPos(1, 1)
 accountButton.onClick(createAccount)
-local accountExists = doesAccountExist()
-if accountExists then accountButton.setText("Account Exists", true) end
-accountButton.setActive(playerFocusInstalled() and (accountExists == false))
-
-balanceButton.setPos(1, 2)
-balanceButton.onClick(getBalance)
-balanceButton.setActive(playerFocusInstalled())
-
+local accName = doesAccountExist()
+if accName then accountButton.setText(accName, true) end
+local pfi = playerFocusInstalled()
+accountButton.setActive(pfi and (doesAccountExist() == false))
+if not pft then
+	monitor.setCursorPos(1, 2)
+	monitor.write("Insert Focus To Begin")
+end
 
 local function waitForButtons()
 	while true do
-		await({ accountButton, balanceButton })
+		await({ accountButton })
 	end
 end
 
 local function setActive(bool)
-	balanceButton.setActive(bool)
-	accountExists = doesAccountExist()
-	if accountExists then
+	local accName = doesAccountExist()
+	if accName then
 		accountButton.setActive(false)
-		accountButton.setText("Account Already Exists", true)
+		accountButton.setText(accName, true)
 		accountButton.draw()
 	else
 		accountButton.setText("Create Account", true)
 		accountButton.setActive(bool)
 	end
-end
-local function reloadButtons()
-	balanceButton.draw()
-	accountButton.draw()
 end
 
 local function monitorFocalPort()
@@ -364,23 +376,29 @@ local function monitorFocalPort()
 		local eventData = { os.pullEvent() }
 		local event = eventData[1]
 		if event == "focus_inserted" then
-			local iota = os.focalPort.readIota()
-			if playerFocusInstalled() then setActive(true) end
+			if playerFocusInstalled() then
+				setActive(true)
+				getBalance()
+			end
 		else
 			if event == "focus_removed" then
 				setActive(false)
+				monitor.clear()
+				monitor.setCursorPos(1, 2)
+				monitor.write("Insert Focus To Begin")
+				reloadScreen()
 			else
 				if event == "new_iota" then
-					local iota = os.focalPort.readIota()
 					if playerFocusInstalled() then
 						setActive(true)
+						getBalance()
 					else
 						setActive(false)
 					end
 				end
 			end
 		end
-		reloadButtons()
+		reloadScreen()
 	end
 end
 

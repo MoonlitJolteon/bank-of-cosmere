@@ -124,7 +124,7 @@ function getSetupScript(): string {
 
 function handleDiconnection(packet: any) {
     clients.delete(packet.message);
-    logger.info(`Removed ${packet.message} to the client map`);
+    logger.info(`Removed ${packet.message} from the client map`);
 }
 
 function broadcast(message: string) {

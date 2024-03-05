@@ -21,7 +21,7 @@ export class BankAccountHandler {
         });
         client.send(JSON.stringify({
             packetType: accountExists ? "accountExists" : "accountDoesntExist",
-            message: accountExists ? "true" : "false"
+            message: accountExists ? account.username : "false"
         }));
     }
 
@@ -49,11 +49,12 @@ export class BankAccountHandler {
     }
 
     public static async handleBalance(packet: any, wsClient: any) {
+        let acc = JSON.parse(packet.message);
         BankAccount.findOne(
             {
                 where: {
-                    username: packet.message.username,
-                    user_uuid: packet.message.uuid
+                    username: acc.username,
+                    user_uuid: acc.uuid
                 }
             }
         ).then((account: BankAccount | null) => {
