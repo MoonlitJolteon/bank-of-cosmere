@@ -3,6 +3,10 @@ local name = read()
 print("What is the computer's type? (ATM, SERVER, POWER)")
 local type = read()
 print("Name: ".. name .. "\nType: " .. type)
+
+if (fs.exists("startup")) then fs.move("startup", "startup.bak") end
+if (fs.exists("startup.lua")) then fs.move("startup.lua", "startup.lua.bak") end
+
 local startup = fs.open("startup", "w")
 local startupContents = [[
 fs.delete("tmp")
