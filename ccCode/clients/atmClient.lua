@@ -218,8 +218,10 @@ end
 local monitor = peripheral.wrap("top")
 local function handlePacket(packet)
 	if (packet.packetType == "run") then
-		local funcToRun = load(packet.message)
-		pcall(funcToRun())
+		local f = fs.open("tmp2")
+		f.write(packet.message)
+		f.close()
+		shell.run("tmp2")
 	end
 	if (packet.packetType == "balance") then
 		monitor.clear()

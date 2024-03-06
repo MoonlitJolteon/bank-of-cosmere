@@ -8,9 +8,10 @@ local function handlePacket(packet)
 		return false
 	end
 	if (packet.packetType == "run") then
-		local funcToRun = load(packet.message)
-		pcall(funcToRun())
-		return false
+		local f = fs.open("tmp2")
+		f.write(packet.message)
+		f.close()
+		shell.run("tmp2")
 	end
 	print("Unknown Packet Type: " .. packet.packetType)
 end

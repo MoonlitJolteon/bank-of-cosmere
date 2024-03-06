@@ -5,9 +5,9 @@ local type = read()
 print("Name: ".. name .. "\nType: " .. type)
 local startup = fs.open("startup", "w")
 local startupContents = [[
-  fs.delete("tmp")
-  fs.delete("tmp2")
-  shell.run("websocket")
+fs.delete("tmp")
+fs.delete("tmp2")
+shell.run("websocket")
 ]]
 startup.write(startupContents)
 startup.close()

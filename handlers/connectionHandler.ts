@@ -42,7 +42,6 @@ export class ConnectionHandler {
             packetType: "init",
             message: script
         }))
-    
         
         if (computerRow != undefined && computerRow.just_rebooted) {
             await sequelize.transaction(async transaction => {

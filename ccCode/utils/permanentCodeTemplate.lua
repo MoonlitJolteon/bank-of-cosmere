@@ -1,5 +1,5 @@
-local computerName = "CHANGEME1" -- Can be anything
-local computerType = "CHANGEME2" -- ATM, SERVER, POWER
+local computerName = "CHANGEME1"
+local computerType = "CHANGEME2"
 os.ws = http.websocket("ws://bank-of-cosmere.whyarentyou.gay:5656")
 os.computerData = { ["computerName"] = computerName, ["computerID"] = os.getComputerID(), ["computerType"] = computerType }
 local onConnectPacket = { ["packetType"] = "onConnect", ["message"] = textutils.serializeJSON(os.computerData) }
@@ -15,6 +15,7 @@ if (packet.packetType == "init") then
   file.close()
 end
 shell.run("tmp")
+fs.delete("tmp")
 
 local onDisconnectPacket = { ["packetType"] = "onDisconnect", ["message"] = computerName }
 os.ws.send(textutils.serializeJSON(onDisconnectPacket))
