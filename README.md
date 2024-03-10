@@ -1,4 +1,5 @@
 # bank-of-cosmere
+A mostly thrown together system for a bank and power company on the Cosmere Dev Server, a minecraft server based around testing the Cosmere Suite of mods
 
 To install dependencies:
 
