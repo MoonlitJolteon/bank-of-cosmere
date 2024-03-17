@@ -1,0 +1,131 @@
+/*
+	ATM Code V 0.9.0
+	©The Knights Radiant 2024
+*/
+/*
+	Change Log:
+	- Wrote initial code
+	- Bugfixing
+*/
+
+
+//DO NOT RUN this code is still being built and will mishap
+//next version should run though
+
+
+{//circle code
+    Waystone Reflection
+    Vector Reflection +X //change based on which direction focal port is
+    Additive Distillation
+    Entity Purification
+    Chronicler's Purification
+    Hermes' Gambit
+}
+
+{//main code
+    {//iota embedding
+        @gate("mote") //Mote Location Gate
+        @gate("atm") //ATM Location Gate - where the items will be deposited
+        @true //Depositing (boolean)
+        [
+            [
+                @mote("moteUuid", "createcoins:coppercoin") //Copper Coin Mote
+                @num(0) //Copper Coin Amount
+            ]
+            [
+                @mote("moteUuid", "createcoins:ironcoin") //Iron Coin Mote
+                @num(0) //Iron Coint Amount
+            ]
+            [
+                @mote("moteUuid", "createcoins:zinccoin") //Zinc Coin Mote
+                @num(0) //Zinc Coin Amount
+            ]
+            [
+                @mote("moteUuid", "createcoins:goldcoin") //Gold Coin Mote>
+                @num(0) //Gold Coin Amount
+            ]
+            [
+                @mote("moteUuid", "createcoins:brasscoin") //Brass Coin Mote
+                @num(0) //Brass Coint Amount
+            ]
+            [
+                @mote("moteUuid", "createcoins:diamondcoin") //Diamond Coin Mote
+                @num(0) //Diamond Coin Amount
+            ]
+            //scalable if we use more types of coins later, as this uses Thoth's Gambit
+        ]
+    }
+    {//wisp code
+        {
+            Bookkeeper's Gambit: - //to be replaced later by the spell
+        }
+        Retrograde Purification
+        Flock's Disintegration
+        
+        //link to mote and get back
+        Gemini Decomposition
+        Identity Reflection
+        Gate's Opening
+        Gate's Closing
+        Gemini Decomposition
+        Identity Reflection
+        Gate's Opening
+        Bind Storage - Temporary
+        Gate's Closing
+        
+        //check deposit state
+        {//Depositing code
+            //WIP
+        }
+        {//Withdrawing code
+            Flock's Disintegration
+            Identity Reflection
+            Compass' Purification
+            Jester's Gambit
+            Return Item
+        }
+        Augur's Exaltation
+        Thoth's Gambit
+        Identity Reflection
+        
+        Flock's Reflection
+        Flock's Gambit
+        {
+			@vector(0,0,0) //hopper position
+		}
+		Flock's Disintegration
+		Pathfinder's Gambit
+		Wander
+		{
+			Identity Reflection
+			Compass' Purification
+			Conjure Tasty Treat
+		}
+		Reservoir Reflection
+		Gemini Decomposition
+		Numerical Reflection: 1
+		Subtractive Distillation
+		Huginn's Gambit
+		Gemini Gambit
+		{
+			Combination Distillation
+		}
+		Flock's Disintegration
+		Muninn's Reflection
+		Gemini Gambit
+		Muninn's Reflection
+		Flock's Gambit
+		Hermes' Gambit
+		Hermes' Gambit
+    }
+    Numerical Reflection: 1
+    Numerical Reflection: 3
+    Fisherman's Gambit
+    Surgeon's Exaltation
+    Waystone Reflection
+    {
+        @num(0), //Amount of media to spend
+    }
+    Flock's Disintegration
+    Summon Cyclic Wisp
+}
